@@ -1,0 +1,3 @@
+Also, if you update frc.json,
+sftp to the pi and put it in the home directory
+./gradlew run may not work on desktop
