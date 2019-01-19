@@ -32,6 +32,12 @@ public class GripPipeline implements VisionPipeline {
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
 
+	public ArrayList<Contour> contours = new ArrayList<Contour>();
+
+	public ArrayList<Contour> getContours() {
+		return contours;
+	}
+
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
@@ -188,7 +194,7 @@ public class GripPipeline implements VisionPipeline {
 			double minVertexCount, double minRatio, double maxRatio, List<MatOfPoint> output) {
 		final MatOfInt hull = new MatOfInt();
 		output.clear();
-		// operation
+		contours.clear();
 		for (int i = 0; i < inputContours.size(); i++) {
 			final MatOfPoint contour = inputContours.get(i);
 			final Rect bb = Imgproc.boundingRect(contour);
@@ -217,6 +223,7 @@ public class GripPipeline implements VisionPipeline {
 			final double ratio = bb.width / (double) bb.height;
 			if (ratio < minRatio || ratio > maxRatio)
 				continue;
+			contours.add(new Contour(area, bb));
 			output.add(contour);
 		}
 	}

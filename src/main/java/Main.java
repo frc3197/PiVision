@@ -1,11 +1,3 @@
-
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2018 FIRST. All Rights Reserved.                             */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,11 +11,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionThread;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /*
    JSON format:
@@ -78,20 +74,13 @@ public final class Main {
   private Main() {
   }
 
-  /**
-   * Report parse error.
-   */
   public static void parseError(String str) {
     System.err.println("config error in '" + configFile + "': " + str);
   }
 
-  /**
-   * Read single camera configuration.
-   */
   public static boolean readCameraConfig(JsonObject config) {
     CameraConfig cam = new CameraConfig();
 
-    // name
     JsonElement nameElement = config.get("name");
     if (nameElement == null) {
       parseError("could not read camera name");
@@ -99,7 +88,6 @@ public final class Main {
     }
     cam.name = nameElement.getAsString();
 
-    // path
     JsonElement hostElement = config.get("host");
     if (hostElement == null) {
       parseError("camera '" + cam.name + "': could not read host");
@@ -107,7 +95,6 @@ public final class Main {
     }
     cam.host = hostElement.getAsString();
 
-    // stream properties
     cam.streamConfig = config.get("stream");
 
     cam.config = config;
@@ -116,12 +103,8 @@ public final class Main {
     return true;
   }
 
-  /**
-   * Read configuration file.
-   */
   @SuppressWarnings("PMD.CyclomaticComplexity")
   public static boolean readConfig() {
-    // parse file
     JsonElement top;
     try {
       top = new JsonParser().parse(Files.newBufferedReader(Paths.get(configFile)));
@@ -130,14 +113,12 @@ public final class Main {
       return false;
     }
 
-    // top level must be an object
     if (!top.isJsonObject()) {
       parseError("must be JSON object");
       return false;
     }
     JsonObject obj = top.getAsJsonObject();
 
-    // team number
     JsonElement teamElement = obj.get("team");
     if (teamElement == null) {
       parseError("could not read team number");
@@ -145,7 +126,6 @@ public final class Main {
     }
     team = teamElement.getAsInt();
 
-    // ntmode (optional)
     if (obj.has("ntmode")) {
       String str = obj.get("ntmode").getAsString();
       if ("client".equalsIgnoreCase(str)) {
@@ -157,7 +137,6 @@ public final class Main {
       }
     }
 
-    // cameras
     JsonElement camerasElement = obj.get("cameras");
     if (camerasElement == null) {
       parseError("could not read cameras");
@@ -173,86 +152,81 @@ public final class Main {
     return true;
   }
 
-  /**
-   * Start running the camera.
-   */
   public static VideoSource startCamera(CameraConfig config) {
     System.out.println("Starting camera '" + config.name + "' on " + config.host);
-    /*
-     * CameraServer inst = CameraServer.getInstance(); UsbCamera camera = new
-     * UsbCamera(config.name, config.path); MjpegServer server =
-     * inst.startAutomaticCapture(camera);
-     * 
-     * Gson gson = new GsonBuilder().create();
-     * 
-     * camera.setConfigJson(gson.toJson(config.config));
-     * camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
-     * 
-     * if (config.streamConfig != null) {
-     * server.setConfigJson(gson.toJson(config.streamConfig)); }
-     * 
-     * return camera;
-     */
+
     return CameraServer.getInstance().addAxisCamera(config.name, config.host);
   }
 
-  /**
-   * Example pipeline.
-   */
-  // public static class MyPipeline implements VisionPipeline {
-  // public int val;
+  static final int kCONTOURS_SIZE = 2;
 
-  // @Override
-  // public void process(Mat mat) {
-  // val += 1;
-  // }
-  // }
-
-  /**
-   * Main.
-   */
   public static void main(String... args) {
     if (args.length > 0) {
       configFile = args[0];
     }
 
-    // read configuration
     if (!readConfig()) {
       return;
     }
 
-    // start NetworkTables
     NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
     if (server) {
       System.out.println("Setting up NetworkTables server");
       ntinst.startServer();
+      System.out.println("NT: sever mode");
     } else {
       System.out.println("Setting up NetworkTables client for team " + team);
       ntinst.startClientTeam(team);
+      System.out.println("NT: client mode");
     }
+    NetworkTable vision = ntinst.getTable("Vision");
+    vision.getEntry("test").setString("connected");
 
-    // start cameras
     List<VideoSource> cameras = new ArrayList<>();
     for (CameraConfig cameraConfig : cameraConfigs) {
       cameras.add(startCamera(cameraConfig));
     }
 
-    // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
       VisionThread visionThread = new VisionThread(cameras.get(0), new GripPipeline(), pipeline -> {
-        ArrayList<MatOfPoint> contours = pipeline.filterContoursOutput();
-        if (!contours.isEmpty()) {
+        // ArrayList<MatOfPoint> contours = pipeline.filterContoursOutput();
+        // if (!contours.isEmpty()) {
+        // // System.out.println("Not empty (" + contours.size() + " contours)!");
+        // Collections.sort(contours, Comparable<>);
+        // for (int i = 0; i < contours.size(); i++) {
+        // double area = Imgproc.contourArea(contours.get(i));
+        // Rect bb = Imgproc.boundingRect(contours.get(i));
+        // double x = bb.x + 0.5 * bb.width;
+        // NetworkTable subtable = vision.getSubTable("contour." + i);
 
+        // subtable.getEntry("area").setNumber(area);
+        // subtable.getEntry("x").setNumber(x);
+
+        // SmartDashboard.putNumber("contour." + i + ".area", area);
+        // SmartDashboard.putNumber("contour." + i + ".x", x);
+        // // System.out.println(i + " " + area + " " + x);
+        // }
+        // } else {
+        // // System.out.println("Empty (no contours)!");
+        // }
+        ArrayList<Contour> contours = pipeline.getContours();
+        if (contours.size() >= kCONTOURS_SIZE) {
+          System.out.println("Not empty (" + contours.size() + " contour(s))!");
+          Collections.sort(contours);
+          double[] areas = new double[kCONTOURS_SIZE];
+          double[] xs = new double[kCONTOURS_SIZE];
+          for (int i = 0; i < kCONTOURS_SIZE; i++) {
+            areas[i] = contours.get(i).getArea();
+            xs[i] = contours.get(i).getX();
+          }
+          SmartDashboard.putNumberArray("contour_areas", areas);
+          SmartDashboard.putNumberArray("contour_xs", xs);
+        } else {
+          System.out.println("Empty (no contours)!");
         }
       });
-      /*
-       * something like this for GRIP: VisionThread visionThread = new
-       * VisionThread(cameras.get(0), new GripPipeline(), pipeline -> { ... });
-       */
       visionThread.start();
     }
-
-    // loop forever
     for (;;) {
       try {
         Thread.sleep(10000);
