@@ -1,0 +1,10 @@
+{
+    "team": 3197,
+    "ntmode": "client",
+    "cameras": [
+        {
+            "name": "axis-camera-vision",
+            "host": "10.31.97.30"
+        }
+    ]
+}

@@ -1,17 +1,20 @@
-package frc.robot;
-
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.HashMap;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
+import edu.wpi.first.vision.VisionPipeline;
+
+import org.opencv.core.*;
+import org.opencv.core.Core.*;
+import org.opencv.features2d.FeatureDetector;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.*;
+import org.opencv.objdetect.*;
 
 /**
  * GripPipeline class.
@@ -21,7 +24,7 @@ import org.opencv.imgproc.Imgproc;
  *
  * @author GRIP
  */
-public class GripPipeline {
+public class GripPipeline implements VisionPipeline {
 
 	// Outputs
 	private Mat normalizeOutput = new Mat();
@@ -37,7 +40,8 @@ public class GripPipeline {
 	 * This is the primary method that runs the entire pipeline and updates the
 	 * outputs.
 	 */
-	public ArrayList<MatOfPoint> process(Mat source0) {
+	@Override
+	public void process(Mat source0) {
 		// Step Normalize0:
 		Mat normalizeInput = source0;
 		int normalizeType = Core.NORM_MINMAX;
@@ -74,7 +78,7 @@ public class GripPipeline {
 				filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight,
 				filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio,
 				filterContoursMaxRatio, filterContoursOutput);
-		return filterContoursOutput;
+
 	}
 
 	/**
@@ -216,4 +220,5 @@ public class GripPipeline {
 			output.add(contour);
 		}
 	}
+
 }
