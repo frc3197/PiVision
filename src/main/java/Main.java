@@ -10,16 +10,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Rect;
-import org.opencv.imgproc.Imgproc;
-
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionThread;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /*
    JSON format:
@@ -155,7 +152,9 @@ public final class Main {
   public static VideoSource startCamera(CameraConfig config) {
     System.out.println("Starting camera '" + config.name + "' on " + config.host);
 
-    return CameraServer.getInstance().addAxisCamera(config.name, config.host);
+    VideoSource camera = CameraServer.getInstance().addAxisCamera(config.name, config.host);
+    CameraServer.getInstance().startAutomaticCapture();
+    return camera;
   }
 
   static final int kCONTOURS_SIZE = 2;
