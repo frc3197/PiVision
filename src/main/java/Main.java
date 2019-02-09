@@ -17,6 +17,7 @@ import org.opencv.imgproc.Imgproc;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionThread;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -180,12 +181,16 @@ public final class Main {
       System.out.println("NT: client mode");
     }
     NetworkTable vision = ntinst.getTable("Vision");
-    vision.getEntry("test").setString("connected");
+    // vision.getEntry("test").clearPersistent();
+    // vision.getEntry("test").setString("test");
 
     List<VideoSource> cameras = new ArrayList<>();
     for (CameraConfig cameraConfig : cameraConfigs) {
       cameras.add(startCamera(cameraConfig));
     }
+
+    NetworkTableEntry contourXs = vision.getEntry("contour_xs");
+    NetworkTableEntry contourAreas = vision.getEntry("contour_areas");
 
     if (cameras.size() >= 1) {
       VisionThread visionThread = new VisionThread(cameras.get(0), new GripPipeline(), pipeline -> {
@@ -213,15 +218,17 @@ public final class Main {
         if (contours.size() >= kCONTOURS_SIZE) {
           System.out.println("Not empty (" + contours.size() + " contour(s))!");
           Collections.sort(contours);
-          double[] areas = new double[kCONTOURS_SIZE];
-          double[] xs = new double[kCONTOURS_SIZE];
+          Double[] areas = new Double[kCONTOURS_SIZE];
+          Double[] xs = new Double[kCONTOURS_SIZE];
           for (int i = 0; i < kCONTOURS_SIZE; i++) {
             areas[i] = contours.get(i).getArea();
             xs[i] = contours.get(i).getX();
           }
-          SmartDashboard.putNumberArray("contour_areas", areas);
-          SmartDashboard.putNumberArray("contour_xs", xs);
+          contourAreas.setNumberArray(areas);
+          contourXs.setNumberArray(xs);
         } else {
+          contourAreas.delete();
+          contourXs.delete();
           System.out.println("Empty (no contours)!");
         }
       });
