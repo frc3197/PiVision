@@ -1,20 +1,17 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.HashMap;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.first.vision.VisionPipeline;
-
-import org.opencv.core.*;
-import org.opencv.core.Core.*;
-import org.opencv.features2d.FeatureDetector;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.*;
-import org.opencv.objdetect.*;
 
 /**
  * GripPipeline class.
@@ -57,9 +54,9 @@ public class GripPipeline implements VisionPipeline {
 
 		// Step HSV_Threshold0:
 		Mat hsvThresholdInput = normalizeOutput;
-		double[] hsvThresholdHue = { 72.84172661870504, 108.18336162988116 };
-		double[] hsvThresholdSaturation = { 90.43444532059335, 255.0 };
-		double[] hsvThresholdValue = { 164.84395498341334, 255.0 };
+		double[] hsvThresholdHue = { 0.0, 180.0 };
+		double[] hsvThresholdSaturation = { 101.90027265872283, 255.0 };
+		double[] hsvThresholdValue = { 157.96445858053568, 255.0 };
 		hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
 		// Step Find_Contours0:
@@ -195,6 +192,7 @@ public class GripPipeline implements VisionPipeline {
 		final MatOfInt hull = new MatOfInt();
 		output.clear();
 		contours.clear();
+		// operation
 		for (int i = 0; i < inputContours.size(); i++) {
 			final MatOfPoint contour = inputContours.get(i);
 			final Rect bb = Imgproc.boundingRect(contour);
@@ -223,8 +221,8 @@ public class GripPipeline implements VisionPipeline {
 			final double ratio = bb.width / (double) bb.height;
 			if (ratio < minRatio || ratio > maxRatio)
 				continue;
-			contours.add(new Contour(area, bb));
 			output.add(contour);
+			contours.add(new Contour(area, bb));
 		}
 	}
 
