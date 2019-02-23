@@ -2,11 +2,11 @@ import org.opencv.core.Rect;
 
 public class Contour implements Comparable<Contour> {
     private double area;
-    private double x;
+    private int x;
 
     public Contour(double area, Rect bb) {
         this.area = area;
-        this.x = bb.x + 0.5 * bb.width;
+        this.x = bb.x + bb.width / 2;
     }
 
     public double getArea() {
@@ -18,7 +18,8 @@ public class Contour implements Comparable<Contour> {
     }
 
     public int compareTo(Contour other) {
-        return (other.area > area) ? -1 : 1;
+        // return (other.area > area) ? -1 : 1;
+        return Integer.compare(x, other.x);
     }
 
 }
