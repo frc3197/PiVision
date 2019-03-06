@@ -26,3 +26,7 @@ dependencies {
     compile name: 'wpilibj'
     compile name: 'wpiHal'
 }
+
+wrapper {
+    gradleVersion = '5.2'
+}
