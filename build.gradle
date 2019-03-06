@@ -4,7 +4,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.3' apply false
 }
 
-mainClassName = 'Main'
+mainClassName = 'org.team3197.frc2019.pivision.Main'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 
@@ -25,8 +25,4 @@ dependencies {
     compile name: 'opencv-344'
     compile name: 'wpilibj'
     compile name: 'wpiHal'
-}
-
-wrapper {
-    gradleVersion = '5.0'
 }

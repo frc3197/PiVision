@@ -1,3 +1,5 @@
+package org.team3197.frc2019.pivision;
+
 import org.opencv.core.Rect;
 
 public class Contour implements Comparable<Contour> {
