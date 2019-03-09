@@ -154,7 +154,8 @@ public final class Main {
 
   public static VideoSource startCamera(CameraConfig config) {
     System.out.println("Starting camera '" + config.name + "' on " + config.host);
-    return CameraServer.getInstance().addAxisCamera(config.name, config.host);
+    VideoSource camera = CameraServer.getInstance().addAxisCamera(config.name, config.host);
+    return camera;
   }
 
   static final int kCONTOURS_SIZE = 2;

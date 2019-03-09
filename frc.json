@@ -3,8 +3,8 @@
     "ntmode": "client",
     "cameras": [
         {
-            "name": "axis-camera-vision",
-            "host": "10.31.97.30"
+            "name": "driver-camera",
+            "host": "10.31.97.4"
         }
     ]
 }
