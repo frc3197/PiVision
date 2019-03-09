@@ -17,7 +17,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionThread;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-
 /*
    JSON format:
    {
@@ -151,9 +150,7 @@ public final class Main {
 
   public static VideoSource startCamera(CameraConfig config) {
     System.out.println("Starting camera '" + config.name + "' on " + config.host);
-
     VideoSource camera = CameraServer.getInstance().addAxisCamera(config.name, config.host);
-    CameraServer.getInstance().startAutomaticCapture();
     return camera;
   }
 
